@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه‌گر پیشرفته ترید ارز</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vaziran:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Vaziran', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+        .form-label {
+            font-weight: bold;
+        }
+        .btn-primary {
+            width: 100%;
+            margin-top: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            white-space: pre-wrap;
+        }
+        #pnlChart {
+            margin-top: 20px;
+        }
+        .theme-switch {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .dark-mode .container {
+            background: #1e1e1e;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .dark-mode #result {
+            background-color: #333;
+        }
+        .dark-mode h1 {
+            color: #4da6ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-switch">
+        <button class="btn btn-secondary" onclick="toggleTheme()">تغییر تم (تاریک/روشن)</button>
+    </div>
+    <div class="container">
+        <h1>محاسبه‌گر پیشرفته ترید ارز</h1>
+        <form id="tradeForm">
+            <div class="mb-3">
+                <label for="entryPrice" class="form-label">قیمت ورودی:</label>
+                <input type="number" class="form-control" id="entryPrice" required>
+            </div>
+            <div class="mb-3">
+                <label for="currentPrice" class="form-label">قیمت فعلی:</label>
+                <input type="number" class="form-control" id="currentPrice" required>
+            </div>
+            <div class="mb-3">
+                <label for="totalMargin" class="form-label">مارجین کلی:</label>
+                <input type="number" class="form-control" id="totalMargin" required>
+            </div>
+            <div class="mb-3">
+                <label for="positionMargin" class="form-label">مارجین پوزیشن:</label>
+                <input type="number" class="form-control" id="positionMargin" required>
+            </div>
+            <div class="mb-3">
+                <label for="leverage" class="form-label">لوریج:</label>
+                <input type="number" class="form-control" id="leverage" required>
+            </div>
+            <div class="mb-3">
+                <label for="positionType" class="form-label">نوع پوزیشن:</label>
+                <select class="form-select" id="positionType">
+                    <option value="لانگ">لانگ</option>
+                    <option value="شورت">شورت</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="currency" class="form-label">ارز پایه (اختیاری):</label>
+                <select class="form-select" id="currency">
+                    <option value="USDT">USDT</option>
+                    <option value="BTC">BTC</option>
+                    <option value="ETH">ETH</option>
+                </select>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="calculateTradingMetrics()">محاسبه</button>
+        </form>
+        <div id="result"></div>
+        <canvas id="pnlChart" width="400" height="200"></canvas>
+        <button class="btn btn-info mt-3" onclick="saveHistory()">ذخیره تاریخچه</button>
+        <button class="btn btn-warning mt-3" onclick="loadHistory()">بارگذاری تاریخچه</button>
+    </div>
+
+    <script>
+        let pnlChart;
+        let history = JSON.parse(localStorage.getItem('tradeHistory')) || [];
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+        }
+
+        function calculateTradingMetrics() {
+            try {
+                const entryPrice = parseFloat(document.getElementById('entryPrice').value);
+                const currentPrice = parseFloat(document.getElementById('currentPrice').value);
+                const totalMargin = parseFloat(document.getElementById('totalMargin').value);
+                const positionMargin = parseFloat(document.getElementById('positionMargin').value);
+                const leverage = parseFloat(document.getElementById('leverage').value);
+                const positionType = document.getElementById('positionType').value;
+                const currency = document.getElementById('currency').value;
+
+                if ([entryPrice, currentPrice, totalMargin, positionMargin, leverage].some(x => x <= 0 || isNaN(x))) {
+                    throw new Error('مقادیر باید مثبت و معتبر باشند!');
+                }
+
+                const quantity = (positionMargin * leverage) / entryPrice;
+                let profitLoss, liqPrice;
+
+                if (positionType === 'لانگ') {
+                    profitLoss = (currentPrice - entryPrice) * quantity;
+                    liqPrice = entryPrice * (1 - 1 / leverage);
+                } else {
+                    profitLoss = (entryPrice - currentPrice) * quantity;
+                    liqPrice = entryPrice * (1 + 1 / leverage);
+                }
+
+                const profitLossPercent = (profitLoss / positionMargin) * 100;
+                let distanceToLiq;
+                if (positionType === 'لانگ') {
+                    distanceToLiq = currentPrice > liqPrice ? ((currentPrice - liqPrice) / entryPrice) * 100 : 0;
+                } else {
+                    distanceToLiq = currentPrice < liqPrice ? ((liqPrice - currentPrice) / entryPrice) * 100 : 0;
+                }
+                const marginRatio = (totalMargin / positionMargin) * 100;
+
+                // ریسک اضافه: حداکثر ریسک مجاز
+                const maxRisk = positionMargin * 0.02; // مثلاً 2% ریسک
+                const riskAdvice = profitLoss < -maxRisk ? 'ریسک بالا! پوزیشن را ببندید.' : 'ریسک قابل قبول.';
+
+                document.getElementById('result').innerText = 
+                    `نتایج محاسبات (${positionType} در ${currency}):\n\n` +
+                    `مقدار پوزیشن: ${quantity.toFixed(4)}\n` +
+                    `سود/زیان: ${profitLoss.toFixed(2)}\n` +
+                    `درصد سود/زیان: ${profitLossPercent.toFixed(2)}%\n` +
+                    `قیمت لیکوییدیشن: ${liqPrice.toFixed(4)}\n` +
+                    `فاصله تا لیکوییدیشن: ${distanceToLiq.toFixed(2)}%\n` +
+                    `نسبت مارجین: ${marginRatio.toFixed(2)}% (هرچه بالاتر، ایمن‌تر)\n` +
+                    `مشاوره ریسک: ${riskAdvice}`;
+
+                // به‌روزرسانی چارت
+                updateChart(profitLossPercent);
+
+                // ذخیره خودکار در تاریخچه
+                history.push({
+                    date: new Date().toLocaleString('fa-IR'),
+                    positionType,
+                    profitLossPercent: profitLossPercent.toFixed(2)
+                });
+                localStorage.setItem('tradeHistory', JSON.stringify(history));
+            } catch (e) {
+                alert(`خطا: ${e.message}`);
+            }
+        }
+
+        function updateChart(percent) {
+            const ctx = document.getElementById('pnlChart').getContext('2d');
+            if (pnlChart) pnlChart.destroy();
+            pnlChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['سود/زیان درصد'],
+                    datasets: [{
+                        data: [percent > 0 ? percent : 0, percent < 0 ? Math.abs(percent) : 0, 100 - Math.abs(percent)],
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'نمودار درصد PNL' }
+                    }
+                }
+            });
+        }
+
+        function saveHistory() {
+            alert('تاریخچه ذخیره شد!');
+        }
+
+        function loadHistory() {
+            let historyText = 'تاریخچه محاسبات:\n';
+            history.forEach(item => {
+                historyText += `${item.date} - ${item.positionType}: ${item.profitLossPercent}%\n`;
+            });
+            alert(historyText);
+        }
+    </script>
+</body>
+</html>
