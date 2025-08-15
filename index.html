@@ -3,216 +3,622 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ماشین حساب ارز دیجیتال</title>
-    <link href="https://fonts.googleapis.com/css2?family=Vaziran:wght@400;700&display=swap" rel="stylesheet">
+    <title>ماشین حساب ارز دیجیتال | Qbin4</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vaziran:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <style>
-        body {
-            font-family: 'Vaziran', sans-serif;
-            background-color: #f0f4f8;
-            color: #333;
-            direction: rtl;
+        :root {
+            --primary: #4a6cfa;
+            --secondary: #7e5bef;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        
+        * {
             margin: 0;
             padding: 0;
-            display: flex;
+            box-sizing: border-box;
         }
-        .sidebar {
-            width: 250px;
-            background-color: #007bff;
-            color: white;
+        
+        body {
+            font-family: 'Vaziran', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            direction: rtl;
+            min-height: 100vh;
             padding: 20px;
-            height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
             position: fixed;
             top: 0;
-            right: 0;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(74, 108, 250, 0.15) 0%, rgba(30, 41, 59, 0) 40%);
+            z-index: -1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            padding-top: 20px;
+        }
+        
+        .header h1 {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            color: #94a3b8;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        
+        .divider {
+            height: 3px;
+            background: var(--gradient);
+            width: 150px;
+            margin: 20px auto;
+            border-radius: 10px;
+        }
+        
+        .creator-box {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 350px;
+            margin: 0 auto 30px;
+            border: 1px solid rgba(74, 108, 250, 0.3);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .creator-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(74, 108, 250, 0.4);
+        }
+        
+        .creator-box h3 {
+            color: #e2e8f0;
+            font-weight: 700;
+            margin-bottom: 15px;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        .sidebar h3 {
-            text-align: center;
-        }
-        .sidebar .contact {
-            text-align: center;
-            font-size: 16px;
-        }
-        .sidebar .contact a {
+        
+        .creator-box .telegram-btn {
+            background: var(--gradient);
             color: white;
             text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 108, 250, 0.4);
         }
-        .main-content {
+        
+        .creator-box .telegram-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(74, 108, 250, 0.6);
+        }
+        
+        .container-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .calculator-container {
             flex: 1;
-            padding: 40px;
-            margin-right: 250px;
-        }
-        .container {
-            max-width: 800px;
-            background: white;
+            min-width: 500px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(74, 108, 250, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 30px;
+        
+        .chart-container {
+            flex: 1;
+            min-width: 500px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(74, 108, 250, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
         }
-        .form-label {
-            font-weight: bold;
+        
+        .chart-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 0 10px;
         }
-        .btn-primary {
+        
+        .chart-header input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(74, 108, 250, 0.5);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-header input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.3);
+        }
+        
+        .chart-header button {
+            background: var(--gradient);
+            border: none;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-header button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(74, 108, 250, 0.4);
+        }
+        
+        #tradingview-chart {
             width: 100%;
-            margin-top: 20px;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
         }
+        
+        .form-label {
+            color: #cbd5e1;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-control {
+            background: rgba(15, 23, 42, 0.7) !important;
+            border: 1px solid rgba(74, 108, 250, 0.5) !important;
+            color: white !important;
+            padding: 12px 20px !important;
+            border-radius: 12px !important;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.3) !important;
+        }
+        
+        .form-select {
+            background: rgba(15, 23, 42, 0.7) !important;
+            border: 1px solid rgba(74, 108, 250, 0.5) !important;
+            color: white !important;
+            padding: 12px 20px !important;
+            border-radius: 12px !important;
+            transition: all 0.3s ease;
+        }
+        
+        .form-select:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.3) !important;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 15px !important;
+            border-radius: 12px !important;
+            font-weight: 700 !important;
+            transition: all 0.3s ease !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient) !important;
+            border: none !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(74, 108, 250, 0.4) !important;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1) !important;
+            border: none !important;
+        }
+        
+        .btn-info:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(14, 165, 233, 0.4) !important;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669) !important;
+            border: none !important;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4) !important;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626) !important;
+            border: none !important;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4) !important;
+        }
+        
+        .form-section {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(74, 108, 250, 0.2);
+        }
+        
+        .form-section h4 {
+            color: #94a3b8;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(74, 108, 250, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
         #result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid rgba(74, 108, 250, 0.3);
+            font-family: monospace;
             white-space: pre-wrap;
-        }
-        .theme-switch {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-        .dark-mode body {
-            background-color: #121212;
-            color: #e0e0e0;
-        }
-        .dark-mode .container {
-            background: #1e1e1e;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        .dark-mode #result {
-            background-color: #333;
-        }
-        .dark-mode h1 {
-            color: #4da6ff;
-        }
-        .dark-mode .sidebar {
-            background-color: #0d47a1;
-        }
-        .advanced-features {
-            margin-top: 20px;
-        }
-        .advanced-features input {
-            margin-bottom: 10px;
-        }
-        .history-list {
-            margin-top: 20px;
+            line-height: 1.8;
+            color: #e2e8f0;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
             max-height: 300px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 10px;
         }
+        
+        .history-list {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            border: 1px solid rgba(74, 108, 250, 0.3);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .history-list h5 {
+            color: #94a3b8;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
         .history-item {
-            border-bottom: 1px solid #eee;
-            padding: 10px 0;
+            background: rgba(30, 41, 59, 0.5);
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(74, 108, 250, 0.2);
+            transition: all 0.3s ease;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        
+        .history-item:hover {
+            background: rgba(30, 41, 59, 0.7);
+            transform: translateX(-5px);
         }
-        .container {
-            animation: fadeIn 0.5s ease-in-out;
+        
+        .history-item .delete-btn {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .history-item .delete-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .result-title {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .risk-high {
+            color: var(--danger);
+            font-weight: 700;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .risk-ok {
+            color: var(--success);
+            font-weight: 700;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+        
+        @media (max-width: 1100px) {
+            .container-wrapper {
+                flex-direction: column;
+            }
+            
+            .calculator-container,
+            .chart-container {
+                min-width: 100%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .creator-box {
+                padding: 12px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <div>
-            <h3>اطلاعات تماس</h3>
-            <p class="contact">برای پشتیبانی یا پیشنهادات، با من در تلگرام تماس بگیرید: <a href="https://t.me/Qbin4">@Qbin4</a></p>
-        </div>
-        <div>
-            <button class="btn btn-light w-100" onclick="toggleTheme()">تغییر تم (تاریک/روشن)</button>
+    <div class="header">
+        <h1>ماشین حساب ارز دیجیتال</h1>
+        <p>ابزار پیشرفته برای محاسبه سود و زیان، قیمت لیکوئید، ریسک به ریوارد و سایر معیارهای معاملاتی</p>
+        
+        <div class="divider"></div>
+        
+        <div class="creator-box">
+            <h3><i class="fas fa-code"></i> ساخته شده توسط</h3>
+            <div class="d-flex justify-content-center">
+                <a href="https://t.me/Qbin4" class="telegram-btn">
+                    <i class="fab fa-telegram"></i> Qbin4
+                </a>
+            </div>
         </div>
     </div>
-    <div class="main-content">
-        <div class="container">
-            <h1>ماشین حساب ارز دیجیتال</h1>
-            <form id="tradeForm">
-                <div class="mb-3">
-                    <label for="entryPrice" class="form-label">قیمت ورودی:</label>
-                    <input type="number" class="form-control" id="entryPrice" required>
+    
+    <div class="container-wrapper">
+        <div class="calculator-container">
+            <div class="form-section">
+                <h4><i class="fas fa-calculator"></i> اطلاعات معامله</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="entryPrice" class="form-label"><i class="fas fa-sign-in-alt"></i> قیمت ورودی:</label>
+                        <input type="number" class="form-control" id="entryPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="currentPrice" class="form-label"><i class="fas fa-chart-line"></i> قیمت فعلی:</label>
+                        <input type="number" class="form-control" id="currentPrice" required>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="currentPrice" class="form-label">قیمت فعلی:</label>
-                    <input type="number" class="form-control" id="currentPrice" required>
-                    <button type="button" class="btn btn-secondary mt-2" onclick="fetchCurrentPrice()">دریافت قیمت زنده (BTC/USDT)</button>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="totalMargin" class="form-label"><i class="fas fa-wallet"></i> مارجین کلی:</label>
+                        <input type="number" class="form-control" id="totalMargin" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="positionMargin" class="form-label"><i class="fas fa-coins"></i> مارجین پوزیشن:</label>
+                        <input type="number" class="form-control" id="positionMargin" required>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="totalMargin" class="form-label">مارجین کلی:</label>
-                    <input type="number" class="form-control" id="totalMargin" required>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leverage" class="form-label"><i class="fas fa-arrows-alt-h"></i> لوریج:</label>
+                        <input type="number" class="form-control" id="leverage" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="positionType" class="form-label"><i class="fas fa-exchange-alt"></i> نوع پوزیشن:</label>
+                        <select class="form-select" id="positionType">
+                            <option value="لانگ">لانگ (Long)</option>
+                            <option value="شورت">شورت (Short)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="positionMargin" class="form-label">مارجین پوزیشن:</label>
-                    <input type="number" class="form-control" id="positionMargin" required>
-                </div>
-                <div class="mb-3">
-                    <label for="leverage" class="form-label">لوریج:</label>
-                    <input type="number" class="form-control" id="leverage" required>
-                </div>
-                <div class="mb-3">
-                    <label for="positionType" class="form-label">نوع پوزیشن:</label>
-                    <select class="form-select" id="positionType">
-                        <option value="لانگ">لانگ</option>
-                        <option value="شورت">شورت</option>
-                    </select>
-                </div>
-                <div class="advanced-features">
-                    <h5>امکانات پیشرفته</h5>
-                    <div class="mb-3">
-                        <label for="tradingFee" class="form-label">کارمزد معامله (%):</label>
+            </div>
+            
+            <div class="form-section">
+                <h4><i class="fas fa-cogs"></i> تنظیمات پیشرفته</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tradingFee" class="form-label"><i class="fas fa-percentage"></i> کارمزد معامله (%):</label>
                         <input type="number" class="form-control" id="tradingFee" value="0.1" step="0.01">
                     </div>
-                    <div class="mb-3">
-                        <label for="stopLoss" class="form-label">قیمت استاپ لاس (اختیاری):</label>
-                        <input type="number" class="form-control" id="stopLoss">
-                    </div>
-                    <div class="mb-3">
-                        <label for="takeProfit" class="form-label">قیمت تیگ پرافیت (اختیاری):</label>
-                        <input type="number" class="form-control" id="takeProfit">
-                    </div>
-                    <div class="mb-3">
-                        <label for="maxRiskPercent" class="form-label">حداکثر ریسک مجاز (% از مارجین):</label>
+                    <div class="form-group">
+                        <label for="maxRiskPercent" class="form-label"><i class="fas fa-radiation"></i> حداکثر ریسک (%):</label>
                         <input type="number" class="form-control" id="maxRiskPercent" value="2" step="0.1">
                     </div>
                 </div>
-                <button type="button" class="btn btn-primary" onclick="calculateTradingMetrics()">محاسبه</button>
-            </form>
-            <div id="result"></div>
-            <div class="history-list" id="historyList"></div>
-            <button class="btn btn-info mt-3" onclick="clearHistory()">پاک کردن تاریخچه</button>
-            <button class="btn btn-success mt-3" onclick="shareResults()">اشتراک‌گذاری نتایج</button>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="stopLoss" class="form-label"><i class="fas fa-stop-circle"></i> قیمت استاپ لاس:</label>
+                        <input type="number" class="form-control" id="stopLoss">
+                    </div>
+                    <div class="form-group">
+                        <label for="takeProfit" class="form-label"><i class="fas fa-bullseye"></i> قیمت تیک پرافیت:</label>
+                        <input type="number" class="form-control" id="takeProfit">
+                    </div>
+                </div>
+            </div>
+            
+            <button type="button" class="btn btn-primary" onclick="calculateTradingMetrics()">
+                <i class="fas fa-calculator"></i> محاسبه معیارهای معاملاتی
+            </button>
+            
+            <div class="result-title"><i class="fas fa-poll"></i> نتایج محاسبات:</div>
+            <div id="result">لطفاً اطلاعات معامله را وارد کرده و روی دکمه محاسبه کلیک کنید...</div>
+            
+            <div class="history-list">
+                <h5><i class="fas fa-history"></i> تاریخچه محاسبات</h5>
+                <div id="historyList"></div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-info" onclick="clearHistory()">
+                    <i class="fas fa-trash-alt"></i> پاک کردن تاریخچه
+                </button>
+                <button class="btn btn-success" onclick="shareResults()">
+                    <i class="fas fa-share-alt"></i> اشتراک‌گذاری نتایج
+                </button>
+                <button class="btn btn-danger" onclick="resetForm()">
+                    <i class="fas fa-redo"></i> ریست فرم
+                </button>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-header">
+                <input type="text" id="symbolInput" placeholder="جستجوی نماد (مثال: BTCUSDT, ETHUSDT)" value="BTCUSDT">
+                <button onclick="loadChart()"><i class="fas fa-sync-alt"></i> بارگذاری چارت</button>
+            </div>
+            <div id="tradingview-chart"></div>
         </div>
     </div>
 
     <script>
+        // متغیرهای جهانی
         let history = JSON.parse(localStorage.getItem('tradeHistory')) || [];
-        updateHistoryList();
-
-        function toggleTheme() {
-            document.body.classList.toggle('dark-mode');
+        
+        // بارگذاری اولیه چارت
+        $(document).ready(function() {
+            loadChart();
+            updateHistoryList();
+        });
+        
+        // تابع برای بارگذاری چارت TradingView
+        function loadChart() {
+            const symbol = $('#symbolInput').val().toUpperCase();
+            
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": `BINANCE:${symbol}`,
+                "interval": "60",
+                "timezone": "Asia/Tehran",
+                "theme": "dark",
+                "style": "1",
+                "locale": "fa_IR",
+                "toolbar_bg": "#0f172a",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "container_id": "tradingview-chart",
+                "studies": ["RSI@tv-basicstudies", "StochasticRSI@tv-basicstudies"],
+                "overrides": {
+                    "paneProperties.background": "#0f172a",
+                    "paneProperties.vertGridProperties.color": "rgba(30, 41, 59, 0.5)",
+                    "paneProperties.horzGridProperties.color": "rgba(30, 41, 59, 0.5)",
+                    "symbolWatermarkProperties.transparency": 90,
+                    "scalesProperties.textColor": "#94a3b8",
+                }
+            });
         }
-
-        async function fetchCurrentPrice() {
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
-                const data = await response.json();
-                document.getElementById('currentPrice').value = data.bitcoin.usd;
-                alert('قیمت فعلی BTC/USDT به‌روزرسانی شد!');
-            } catch (e) {
-                alert('خطا در دریافت قیمت زنده: ' + e.message);
-            }
-        }
-
+        
+        // تابع محاسبه معیارهای معاملاتی
         function calculateTradingMetrics() {
             try {
+                // دریافت مقادیر فرم
                 const entryPrice = parseFloat(document.getElementById('entryPrice').value);
                 const currentPrice = parseFloat(document.getElementById('currentPrice').value);
                 const totalMargin = parseFloat(document.getElementById('totalMargin').value);
@@ -224,13 +630,16 @@
                 const takeProfit = parseFloat(document.getElementById('takeProfit').value) || 0;
                 const maxRiskPercent = parseFloat(document.getElementById('maxRiskPercent').value) || 2;
 
+                // اعتبارسنجی مقادیر
                 if ([entryPrice, currentPrice, totalMargin, positionMargin, leverage].some(x => x <= 0 || isNaN(x))) {
                     throw new Error('مقادیر باید مثبت و معتبر باشند!');
                 }
 
+                // محاسبه مقدار پوزیشن
                 const quantity = (positionMargin * leverage) / entryPrice;
                 let profitLoss, liqPrice;
 
+                // محاسبات بر اساس نوع پوزیشن (لانگ یا شورت)
                 if (positionType === 'لانگ') {
                     profitLoss = (currentPrice - entryPrice) * quantity;
                     liqPrice = entryPrice * (1 - 1 / leverage);
@@ -239,17 +648,22 @@
                     liqPrice = entryPrice * (1 + 1 / leverage);
                 }
 
-                // اعمال کارمزد
-                const feeAmount = (positionMargin * leverage * tradingFee) * 2; // ورود و خروج
+                // اعمال کارمزد معامله
+                const feeAmount = (positionMargin * leverage * tradingFee) * 2; // کارمزد ورود و خروج
                 profitLoss -= feeAmount;
 
+                // محاسبه درصد سود/زیان
                 const profitLossPercent = (profitLoss / positionMargin) * 100;
+                
+                // محاسبه فاصله تا لیکوئید
                 let distanceToLiq;
                 if (positionType === 'لانگ') {
                     distanceToLiq = currentPrice > liqPrice ? ((currentPrice - liqPrice) / entryPrice) * 100 : 0;
                 } else {
                     distanceToLiq = currentPrice < liqPrice ? ((liqPrice - currentPrice) / entryPrice) * 100 : 0;
                 }
+                
+                // محاسبه نسبت مارجین
                 const marginRatio = (totalMargin / positionMargin) * 100;
 
                 // محاسبات پیشرفته
@@ -264,71 +678,118 @@
                     }
                 }
 
+                // محاسبه ریسک و مشاوره
                 const maxRisk = (maxRiskPercent / 100) * positionMargin;
-                const riskAdvice = Math.abs(profitLoss) > maxRisk && profitLoss < 0 ? 'ریسک بالا! پوزیشن را ببندید.' : 'ریسک قابل قبول.';
+                const riskAdvice = Math.abs(profitLoss) > maxRisk && profitLoss < 0 ? 
+                    '<span class="risk-high">ریسک بالا! پوزیشن را ببندید.</span>' : 
+                    '<span class="risk-ok">ریسک قابل قبول.</span>';
 
-                // محاسبه قیمت break-even
+                // محاسبه قیمت بریک ایون
                 const breakEvenPrice = positionType === 'لانگ' ? entryPrice + (feeAmount / quantity) : entryPrice - (feeAmount / quantity);
 
-                document.getElementById('result').innerText = 
-                    `نتایج محاسبات (${positionType}):\n\n` +
-                    `مقدار پوزیشن: ${quantity.toFixed(4)}\n` +
-                    `سود/زیان (با کارمزد): ${profitLoss.toFixed(2)}\n` +
-                    `درصد سود/زیان: ${profitLossPercent.toFixed(2)}%\n` +
-                    `قیمت لیکوییدیشن: ${liqPrice.toFixed(4)}\n` +
-                    `فاصله تا لیکوییدیشن: ${distanceToLiq.toFixed(2)}%\n` +
-                    `نسبت مارجین: ${marginRatio.toFixed(2)}% (هرچه بالاتر، ایمن‌تر)\n` +
-                    `قیمت بریک ایون: ${breakEvenPrice.toFixed(4)}\n` +
-                    (stopLoss > 0 ? `سود/زیان در استاپ لاس: ${stopLossPL.toFixed(2)}\n` : '') +
-                    (takeProfit > 0 ? `سود/زیان در تیگ پرافیت: ${takeProfitPL.toFixed(2)}\n` : '') +
-                    `ریسک به ریوارد ریشیو: ${riskRewardRatio}\n` +
-                    `مشاوره ریسک: ${riskAdvice}`;
+                // نمایش نتایج
+                document.getElementById('result').innerHTML = 
+                    `┌─────────────── نتایج محاسبات (${positionType}) ──────────────┐\n\n` +
+                    `│ مقدار پوزیشن: ${quantity.toFixed(4)}\n` +
+                    `│ سود/زیان (با کارمزد): ${profitLoss.toFixed(2)} (${profitLossPercent.toFixed(2)}%)\n` +
+                    `│ قیمت لیکوییدیشن: ${liqPrice.toFixed(4)}\n` +
+                    `│ فاصله تا لیکوییدیشن: ${distanceToLiq.toFixed(2)}%\n` +
+                    `│ نسبت مارجین: ${marginRatio.toFixed(2)}%\n` +
+                    `│ قیمت بریک ایون: ${breakEvenPrice.toFixed(4)}\n` +
+                    (stopLoss > 0 ? `│ زیان در استاپ لاس: ${stopLossPL.toFixed(2)}\n` : '') +
+                    (takeProfit > 0 ? `│ سود در تیک پرافیت: ${takeProfitPL.toFixed(2)}\n` : '') +
+                    `│ ریسک به ریوارد: ${riskRewardRatio}\n` +
+                    `│ مشاوره ریسک: ${riskAdvice}\n\n` +
+                    `└───────────────────────────────────────────────────┘`;
 
                 // ذخیره در تاریخچه
                 history.push({
                     date: new Date().toLocaleString('fa-IR'),
                     positionType,
+                    profitLoss: profitLoss.toFixed(2),
                     profitLossPercent: profitLossPercent.toFixed(2),
                     riskReward: riskRewardRatio
                 });
                 localStorage.setItem('tradeHistory', JSON.stringify(history));
                 updateHistoryList();
             } catch (e) {
-                alert(`خطا: ${e.message}`);
+                document.getElementById('result').innerHTML = `<span style="color: #ef4444">خطا: ${e.message}</span>`;
             }
         }
-
+        
+        // تابع به‌روزرسانی لیست تاریخچه
         function updateHistoryList() {
             const historyList = document.getElementById('historyList');
-            historyList.innerHTML = '<h5>تاریخچه محاسبات</h5>';
-            history.forEach((item, index) => {
+            historyList.innerHTML = '';
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="text-center py-3 text-muted">هیچ محاسبه‌ای در تاریخچه وجود ندارد</div>';
+                return;
+            }
+            
+            // نمایش آیتم‌های تاریخچه به صورت معکوس (جدیدترین ابتدا)
+            history.slice().reverse().forEach((item, index) => {
+                const actualIndex = history.length - 1 - index;
                 const div = document.createElement('div');
                 div.className = 'history-item';
-                div.innerHTML = `${item.date} - ${item.positionType}: ${item.profitLossPercent}% (ریسک/ریوارد: ${item.riskReward}) <button class="btn btn-sm btn-danger" onclick="deleteHistoryItem(${index})"><i class="fas fa-trash"></i></button>`;
+                
+                const profitColor = parseFloat(item.profitLoss) >= 0 ? 'text-success' : 'text-danger';
+                const profitIcon = parseFloat(item.profitLoss) >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+                
+                div.innerHTML = `
+                    <div>
+                        <div><i class="far fa-calendar"></i> ${item.date}</div>
+                        <div class="mt-1"><i class="fas ${profitIcon} ${profitColor}"></i> <span class="${profitColor}">${item.profitLoss} (${item.profitLossPercent}%)</span></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span>${item.positionType}</span>
+                        <button class="delete-btn" onclick="deleteHistoryItem(${actualIndex})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
                 historyList.appendChild(div);
             });
         }
-
+        
+        // تابع حذف آیتم از تاریخچه
         function deleteHistoryItem(index) {
             history.splice(index, 1);
             localStorage.setItem('tradeHistory', JSON.stringify(history));
             updateHistoryList();
         }
-
+        
+        // تابع پاک‌سازی تاریخچه
         function clearHistory() {
-            history = [];
-            localStorage.removeItem('tradeHistory');
-            updateHistoryList();
+            if (confirm('آیا از پاک کردن تمام تاریخچه محاسبات اطمینان دارید؟')) {
+                history = [];
+                localStorage.removeItem('tradeHistory');
+                updateHistoryList();
+            }
         }
-
+        
+        // تابع اشتراک‌گذاری نتایج
         function shareResults() {
             const resultText = document.getElementById('result').innerText;
             navigator.clipboard.writeText(resultText).then(() => {
-                alert('نتایج به کلیپ‌بورد کپی شد!');
+                alert('نتایج با موفقیت در کلیپ‌بورد کپی شد!');
             }).catch(() => {
-                alert('خطا در کپی کردن!');
+                alert('خطا در کپی کردن نتایج!');
             });
         }
+        
+        // تابع ریست فرم
+        function resetForm() {
+            document.getElementById('tradeForm').reset();
+            document.getElementById('result').innerText = 'لطفاً اطلاعات معامله را وارد کرده و روی دکمه محاسبه کلیک کنید...';
+        }
+        
+        // رویداد برای جستجوی ارز با Enter
+        document.getElementById('symbolInput').addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                loadChart();
+            }
+        });
     </script>
 </body>
 </html>
