@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محاسبه‌گر پیشرفته ترید ارز</title>
+    <title>ماشین حساب ارز دیجیتال</title>
     <link href="https://fonts.googleapis.com/css2?family=Vaziran:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -64,6 +64,12 @@
         .dark-mode h1 {
             color: #4da6ff;
         }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -71,7 +77,7 @@
         <button class="btn btn-secondary" onclick="toggleTheme()">تغییر تم (تاریک/روشن)</button>
     </div>
     <div class="container">
-        <h1>محاسبه‌گر پیشرفته ترید ارز</h1>
+        <h1>ماشین حساب ارز دیجیتال</h1>
         <form id="tradeForm">
             <div class="mb-3">
                 <label for="entryPrice" class="form-label">قیمت ورودی:</label>
@@ -115,6 +121,9 @@
         <button class="btn btn-info mt-3" onclick="saveHistory()">ذخیره تاریخچه</button>
         <button class="btn btn-warning mt-3" onclick="loadHistory()">بارگذاری تاریخچه</button>
     </div>
+    <div class="footer">
+        تماس: @Qbin4 در تلگرام
+    </div>
 
     <script>
         let pnlChart;
@@ -154,7 +163,7 @@
                 if (positionType === 'لانگ') {
                     distanceToLiq = currentPrice > liqPrice ? ((currentPrice - liqPrice) / entryPrice) * 100 : 0;
                 } else {
-                    distanceToLiq = currentPrice < liqPrice ? ((liqPrice - currentPrice) / entryPrice) * 100 : 0;
+                    distanceToLiq = currentPrice < liqPrice ? ((liqPrice - currentPrice) / entry_price) * 100 : 0;
                 }
                 const marginRatio = (totalMargin / positionMargin) * 100;
 
